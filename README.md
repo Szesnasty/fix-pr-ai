@@ -118,7 +118,7 @@ gh auth login
 
 ### 2. Initialize the package
 
-After installation, run:
+**⚠️ REQUIRED:** After installation, you MUST run:
 
 ```bash
 npx pr-cleaner-ai init
@@ -127,7 +127,9 @@ npx pr-cleaner-ai init
 This will:
 - Copy `.cursor/rules/pr-cleaner-ai.mdc` from npm package (Cursor AI integration)
 - Add `.pr-cleaner-ai-output/` and `.cursor/rules/pr-cleaner-ai.mdc` to `.gitignore`
-- Update `.gitignore` to safely ignore generated files
+- Ensure generated files are properly ignored by Git
+
+**Important:** Without running `init`, generated files may appear in your Git changes.
 
 Optional: add npm scripts to `package.json`:
 ```bash
@@ -144,9 +146,9 @@ git commit -m "chore: configure pr-cleaner-ai"
 ```
 
 **Important:** 
-- `.cursor/rules/pr-cleaner-ai.mdc` is automatically gitignored and **auto-updated** on every `npm install`
-- Rules always match your installed package version - no manual updates needed
-- No need to commit `.cursor/rules/pr-cleaner-ai.mdc` or `.pr-cleaner-ai-output/` - they're auto-generated
+- `.cursor/rules/pr-cleaner-ai.mdc` is automatically gitignored (added by `init`)
+- To update rules file to match new package version, run `npx pr-cleaner-ai init` again
+- No need to commit `.cursor/rules/pr-cleaner-ai.mdc` or `.pr-cleaner-ai-output/` - they're generated files
 - Each team member needs GitHub CLI authenticated (`gh auth login`)
 
 ---

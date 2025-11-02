@@ -5,8 +5,8 @@
  * Postinstall hook for pr-cleaner-ai
  * 
  * - Shows welcome message
- * - Auto-updates .cursor/rules/pr-cleaner-ai.mdc if it exists (matches installed version)
- * - User must run `npx pr-cleaner-ai init` for first-time setup
+ * - Reminds user to run `npx pr-cleaner-ai init` for first-time setup
+ * - Does NOT modify any files automatically (user must run init explicitly)
  */
 
 function main() {
@@ -22,74 +22,20 @@ function main() {
   const rulesFile = path.join(projectRoot, '.cursor', 'rules', 'pr-cleaner-ai.mdc');
   const hasRulesFile = fs.existsSync(rulesFile);
   
-  // Try to find source file in npm package
-  const possibleSourcePaths = [
-    path.join(projectRoot, 'node_modules', 'pr-cleaner-ai', 'config', 'pr-cleaner-ai.mdc'),
-    path.join(__dirname, '../config/pr-cleaner-ai.mdc'),
-    path.join(__dirname, '../../config/pr-cleaner-ai.mdc')
-  ];
+  console.log('\n🎉 pr-cleaner-ai installed successfully!\n');
   
-  let sourcePath = null;
-  for (const possiblePath of possibleSourcePaths) {
-    if (fs.existsSync(possiblePath)) {
-      sourcePath = possiblePath;
-      break;
-    }
-  }
-  
-  // Always ensure rules file exists and is up-to-date
-  if (sourcePath) {
-    try {
-      // Create .cursor/rules directory if it doesn't exist
-      const rulesDir = path.dirname(rulesFile);
-      if (!fs.existsSync(rulesDir)) {
-        fs.mkdirSync(rulesDir, { recursive: true });
-      }
-      
-      // Copy rules file (creates if doesn't exist, updates if exists)
-      fs.copyFileSync(sourcePath, rulesFile);
-      
-      console.log('\n🎉 pr-cleaner-ai installed successfully!\n');
-      
-      if (hasRulesFile) {
-        console.log('✅ Auto-updated .cursor/rules/pr-cleaner-ai.mdc to match installed version');
-        console.log('   (No action needed - rules are up-to-date)\n');
-      } else {
-        console.log('✅ Created .cursor/rules/pr-cleaner-ai.mdc');
-        console.log('   (Rules file auto-created from npm package)\n');
-      }
-    } catch (error) {
-      // Silent fail - just show normal message
-      console.log('\n🎉 pr-cleaner-ai installed successfully!\n');
-      if (hasRulesFile) {
-        console.log('ℹ️  Cursor rules file detected');
-        console.log('   Run: \x1b[1mnpx pr-cleaner-ai init\x1b[0m to update\n');
-      } else {
-        console.log('📝 Next step: Initialize the package');
-        console.log('   Run: \x1b[1mnpx pr-cleaner-ai init\x1b[0m\n');
-      }
-    }
+  if (hasRulesFile) {
+    console.log('✅ Cursor rules file detected (already initialized)');
+    console.log('   If you want to update it, run: \x1b[1mnpx pr-cleaner-ai init\x1b[0m\n');
   } else {
-    // Source not found - package might not be fully installed
-    console.log('\n🎉 pr-cleaner-ai installed successfully!\n');
-    
-    if (hasRulesFile) {
-      console.log('💡 Cursor rules file detected.');
-      console.log('   Run: \x1b[1mnpx pr-cleaner-ai init\x1b[0m to update\n');
-    } else {
-      console.log('📝 Next step: Initialize the package');
-      console.log('');
-      console.log('   Run: \x1b[1mnpx pr-cleaner-ai init\x1b[0m');
-      console.log('');
-      console.log('This will:');
-      console.log('  • Copy .cursor/rules/pr-cleaner-ai.mdc from npm package');
-      console.log('  • Add entries to .gitignore');
-      console.log('  • Optionally add scripts to package.json');
-      console.log('');
-      console.log('💡 Note: Rules are auto-created/updated on every npm install!');
-      console.log('   (.cursor/rules/pr-cleaner-ai.mdc is gitignored - no need to commit)');
-      console.log('');
-    }
+    console.log('📝 Next step: Initialize the package');
+    console.log('   Run: \x1b[1mnpx pr-cleaner-ai init\x1b[0m');
+    console.log('');
+    console.log('This will:');
+    console.log('  • Copy .cursor/rules/pr-cleaner-ai.mdc from npm package');
+    console.log('  • Add .pr-cleaner-ai-output/ and .cursor/rules/pr-cleaner-ai.mdc to .gitignore');
+    console.log('  • Optionally add scripts to package.json');
+    console.log('');
   }
   
   console.log('After init, you can use:');

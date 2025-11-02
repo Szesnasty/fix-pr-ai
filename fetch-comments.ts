@@ -588,6 +588,24 @@ class PRCommentsFetcher {
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
+      // Check if .gitignore has the output directory (optional warning)
+      try {
+        const gitignorePath = path.join(process.cwd(), '.gitignore');
+        if (fs.existsSync(gitignorePath)) {
+          const gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
+          const outputDirName = path.basename(outputDir);
+          const isGitignored = gitignoreContent.includes(outputDirName) || 
+                              gitignoreContent.includes('.pr-cleaner-ai-output');
+          
+          if (!isGitignored) {
+            console.log('\n⚠️  Note: Output files may appear in Git. To ignore them, run:');
+            console.log('   npx pr-cleaner-ai init\n');
+          }
+        }
+      } catch {
+        // Ignore errors - this is just a helpful warning
+      }
+
       // Save markdown
       const markdownPath = path.join(outputDir, `pr-${this.prNumber}-comments.md`);
       const markdown = this.generateMarkdown(groupedComments, stats);
