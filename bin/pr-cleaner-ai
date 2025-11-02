@@ -1,0 +1,112 @@
+#!/usr/bin/env node
+
+/**
+ * CLI entry point for pr-cleaner-ai
+ * 
+ * Commands:
+ * - pr-cleaner-ai fetch (auto-detect PR from current branch)
+ * - pr-cleaner-ai fetch --pr=2146 (specific PR number)
+ * - pr-cleaner-ai check
+ */
+
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+const command = process.argv[2];
+
+// Find script in package
+const scriptPath = path.join(__dirname, '..');
+
+/**
+ * Find tsx executable - resolve as a module
+ */
+function findTsx() {
+  try {
+    // Use require.resolve to find tsx module
+    // tsx will be in node_modules since it's a dependency
+    return require.resolve('tsx/cli');
+  } catch (e) {
+    console.error('❌ Error: tsx not found!');
+    console.error('   This package requires tsx to run TypeScript files.');
+    console.error('   tsx should be automatically installed as a dependency.');
+    console.error('');
+    console.error('   Please try:');
+    console.error('   npm install');
+    process.exit(1);
+  }
+}
+
+if (command === 'fetch') {
+  // Run fetch-comments.ts
+  const tsxPath = findTsx();
+  const fetchScript = path.join(scriptPath, 'fetch-comments.ts');
+  
+  // Verify script exists
+  if (!fs.existsSync(fetchScript)) {
+    console.error(`❌ Error: Script not found: ${fetchScript}`);
+    process.exit(1);
+  }
+  
+  // Pass remaining arguments
+  const args = process.argv.slice(3);
+  
+  spawn('node', [tsxPath, fetchScript, ...args], {
+    stdio: 'inherit',
+    cwd: process.cwd()
+  }).on('exit', (code) => {
+    process.exit(code || 0);
+  });
+} else if (command === 'init') {
+  // Run init.js
+  const initScript = path.join(scriptPath, 'scripts', 'init.js');
+  
+  // Verify script exists
+  if (!fs.existsSync(initScript)) {
+    console.error(`❌ Error: Init script not found: ${initScript}`);
+    process.exit(1);
+  }
+  
+  // Pass remaining arguments
+  const args = process.argv.slice(3);
+  
+  spawn('node', [initScript, ...args], {
+    stdio: 'inherit',
+    cwd: process.cwd()
+  }).on('exit', (code) => {
+    process.exit(code || 0);
+  });
+} else if (command === 'check') {
+  // Run check-requirements.ts
+  const tsxPath = findTsx();
+  const checkScript = path.join(scriptPath, 'check-requirements.ts');
+  
+  // Verify script exists
+  if (!fs.existsSync(checkScript)) {
+    console.error(`❌ Error: Script not found: ${checkScript}`);
+    process.exit(1);
+  }
+  
+  spawn('node', [tsxPath, checkScript], {
+    stdio: 'inherit',
+    cwd: process.cwd()
+  }).on('exit', (code) => {
+    process.exit(code || 0);
+  });
+} else {
+  console.log('Usage: pr-cleaner-ai [init|fetch|check]');
+  console.log('');
+  console.log('Commands:');
+  console.log('  init                      Initialize pr-cleaner-ai in your project');
+  console.log('  fetch                     Fetch comments from PR (auto-detect from current branch)');
+  console.log('  fetch --pr=NUMBER         Fetch comments from specific PR number');
+  console.log('  check                     Check requirements');
+  console.log('');
+  console.log('Examples:');
+  console.log('  pr-cleaner-ai init');
+  console.log('  pr-cleaner-ai init --with-scripts');
+  console.log('  pr-cleaner-ai fetch                    # Auto-detect PR from current branch');
+  console.log('  pr-cleaner-ai fetch --pr=2146          # Specific PR number');
+  process.exit(1);
+}
+

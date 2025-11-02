@@ -1,0 +1,5 @@
+
+# fix-pr-ai - prevent sensitive files from being archived
+.env.fix-pr-ai export-ignore
+.fix-pr-ai-output/ export-ignore
+.cursor/rules/fix-pr-ai.mdc export-ignore

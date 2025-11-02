@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
+!config/.env.example
+
+# Output files (temporary)
+.pr-cleaner-ai-output/
+pr-cleaner-ai-output/
+output/
+
+# Test files
+coverage/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Package files
+*.tgz
+
+# Temporary files
+tmp/
+temp/
+
+# Development files
+CHANGES.md
+FINAL_SUMMARY.md
+
+
+# pr-cleaner-ai - Cursor rules file (auto-generated, don't commit)
+.cursor/rules/pr-cleaner-ai.mdc

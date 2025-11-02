@@ -1,0 +1,765 @@
+---
+description: Automatically fetch and resolve GitHub Pull Request comments. Activates when you mention PR (with or without number): 'fix PR', 'PR 2146', 'fix PR 2146', '#2146', 'PR#2146', 'pr2146', or any variation
+alwaysApply: false
+---
+
+# PR Comments Resolver
+
+## Role
+You are an expert in resolving comments from GitHub Pull Requests. Your task is to automatically fetch comments from PR and analyze them.
+
+## Activation
+
+This rule is **automatically activated** when user mentions a PR in **ANY** of these formats:
+
+### Auto-detect mode (NO PR number needed!):
+- `fix PR` / `fix pr` (no number - will auto-detect from current branch!)
+- `resolve PR` / `resolve pr`
+- `apply PR fixes` / `apply pr fixes`
+- `review PR` / `review pr`
+- `check PR` / `check pr`
+- `PR` or `pr` (if context clearly refers to pull request review/fixes)
+
+### With specific PR number:
+
+### Primary formats (always activate):
+- `PR 2146` or `pr 2146` (space between PR and number)
+- `PR#2146` or `pr#2146` (no space after PR)
+- `PR2146` or `pr2146` (no space or hash)
+- `#2146` (just hash and number)
+- `pr #2146` or `PR #2146` (space before hash)
+
+### With action words (always activate):
+- `fix PR 2146` / `fix pr 2146`
+- `fix PR#2146` / `fix pr#2146`
+- `fix PR2146` / `fix pr2146`
+- `fix #2146`
+- `resolve PR 2146` / `resolve pr 2146`
+- `apply PR 2146` / `apply pr 2146`
+- `handle PR 2146` / `handle pr 2146`
+- `work on PR 2146` / `work on pr 2146`
+- `check PR 2146` / `check pr 2146`
+- `look at PR 2146` / `look at pr 2146`
+
+### Just the number (activate if context suggests PR):
+- `2146` (if in context of PR, pull request, code review, comments, or similar)
+- `fix 2146` (likely means PR 2146)
+- `resolve 2146` (likely means PR 2146)
+
+### Case-insensitive and flexible:
+- **All variations work:** PR/pr/Pr/pR (any case)
+- **With or without hash:** `#` is optional
+- **With or without space:** `PR 123` = `PR123` = `PR#123`
+- **Numbers anywhere:** Works if PR number appears anywhere in the message
+- **NO NUMBER = auto-detect:** If no number provided, tool will find PR from current branch
+
+### Examples that MUST activate:
+- "fix PR" ✅ (AUTO-DETECT - NEW!)
+- "resolve PR" ✅ (AUTO-DETECT - NEW!)
+- "fix PR 2146" ✅
+- "PR#2146" ✅
+- "resolve pr 2146" ✅
+- "pr2146" ✅
+- "#2146" ✅
+- "fix #2146" ✅
+- "can you help with PR 2146?" ✅
+- "what about pr2146?" ✅
+- "please look at PR#2146" ✅
+- "2146" (if context suggests PR) ✅
+- "fix comments from pr 2146" ✅
+- "apply changes from PR 2146" ✅
+
+**🚨 CRITICAL ACTIVATION RULES:**
+1. **If you see ANY format above → ACTIVATE IMMEDIATELY!**
+2. **Extract PR number from message** (digits after PR/pr/#) **OR leave empty for auto-detect**
+3. **Do NOT wait for confirmation** - start Step 1 immediately
+4. **Be lenient with format** - if it looks like a PR reference, activate!
+5. **Context matters** - if message mentions "PR", "pull request", "review", "comments" → activate!
+6. **No number = auto-detect mode** - tool will find PR from current git branch
+
+**Important:** Once activated, you MUST complete ALL steps (Step 0-6) - no skipping, no shortcuts!
+
+## Workflow
+
+🚨 **MANDATORY WORKFLOW - ALL STEPS MUST BE COMPLETED! 🚨**
+
+Once this rule is activated (by detecting a PR number), you **MUST** complete **ALL** steps below in order. 
+**NO EXCEPTIONS! NO SKIPPING!**
+
+### Workflow Enforcement:
+- ✅ **Step 0 MUST be done** (check config)
+- ✅ **Step 1 MUST be done** (fetch comments)
+- ✅ **Step 2 MUST be done** (open generated file)
+- ✅ **Step 3 MUST be done** (show beautiful list) - **NEVER SKIP THIS!**
+- ✅ **Step 4 MUST be done** (fix decision based on config/user)
+- ✅ **Step 5 MUST be done** (if fixing was chosen)
+- ✅ **Step 6 MUST be done** (summary after fixes)
+
+**If ANY step fails:**
+- Explain the error clearly in English
+- Propose a solution
+- Try alternative approaches
+- DO NOT give up - complete the workflow!
+
+When user provides a PR number, follow these steps **IN ORDER**:
+
+### Step 0: Load configuration (optional)
+
+Check if configuration file exists: `.pr-cleaner-ai.config.json`
+
+**If file exists:**
+- Load and read `autoFix` setting:
+  - `autoFix: false` (default) → After showing list, **ASK** user what to do
+  - `autoFix: true` → After showing list, **AUTOMATICALLY** start fixing (no asking)
+
+**If file does NOT exist:**
+- Use default: `autoFix: false` → After showing list, **ASK** user what to do
+
+**IMPORTANT:** Regardless of `autoFix` setting, ALWAYS show the beautiful list first (Step 3)!
+
+### Step 1: Fetch comments from PR
+
+🚨 **MANDATORY STEP - MUST BE COMPLETED!**
+
+**TWO OPTIONS TO RUN:**
+
+**Option A: Auto-detect PR from current branch (NO PR number needed!):**
+```bash
+npx pr-cleaner-ai fetch
+```
+This will automatically find the PR associated with the current branch.
+
+**Option B: Specify PR number manually:**
+
+**Extract PR number first:**
+- Look for digits in the user's message (after PR/pr/#/PR#/pr#)
+- Examples: "PR 2146" → 2146, "#2146" → 2146, "pr2146" → 2146
+- If multiple numbers, use the first one that looks like a PR number (usually 3-5 digits)
+- **If NO number found in message** → Use Option A (auto-detect) instead!
+
+**Then run command with the number:**
+
+Try in this order until one works:
+
+1. First try (if package.json has script):
+```bash
+npm run pr-cleaner-ai -- --pr=PR_NUMBER
+```
+
+2. If above fails, try:
+```bash
+npx pr-cleaner-ai fetch --pr=PR_NUMBER
+```
+
+3. If above fails, try:
+```bash
+node node_modules/pr-cleaner-ai/bin/pr-cleaner-ai fetch --pr=PR_NUMBER
+```
+
+**Where `PR_NUMBER` is the extracted number** (e.g., `2146` for "PR 2146")
+
+**🚨 If command fails:**
+- Check if GitHub CLI (gh) is installed and authenticated (`gh auth status`)
+- Check if package is installed (`npm install pr-cleaner-ai`)
+- If auto-detect fails: make sure you're on a branch with an associated PR
+- Check error message and explain in English
+- Try alternative command from the list above
+- **DO NOT PROCEED to Step 2 until Step 1 succeeds!**
+
+**NOTE:** 
+- **Option A (auto-detect) works when you're on a branch that has a PR** - tool will find it automatically!
+- Script automatically detects project root, so you don't need to provide path
+- **All comments are fetched** (both resolved ✅ and unresolved ⏳)
+- **Work only with UNRESOLVED comments** (marked with ⏳) - resolved comments are shown for reference only
+
+### Step 2: Open generated file
+
+🚨 **MANDATORY STEP - MUST BE COMPLETED!**
+
+**Check these locations IN ORDER until file is found:**
+
+1. **Primary location:**
+```
+.pr-cleaner-ai-output/pr-PR_NUMBER-comments.md
+```
+
+2. **Alternative location 1:**
+```
+pr-cleaner-ai-output/pr-PR_NUMBER-comments.md
+```
+
+3. **Alternative location 2:**
+```
+.github/pr-comments/pr-PR_NUMBER-comments.md
+```
+
+4. **Alternative location 3 (root):**
+```
+pr-PR_NUMBER-comments.md
+```
+
+**Use `read_file` tool to open the file**
+
+**🚨 If file not found:**
+- Verify Step 1 completed successfully (check for errors)
+- List directory contents to find where file was created
+- Try all alternative locations above
+- Check if PR number was extracted correctly
+- **DO NOT PROCEED to Step 3 until file is found and read!**
+
+**Note:** Script automatically selects appropriate location depending on where it was installed, but file might be in any of the above locations.
+
+**IMPORTANT:** 
+- Each comment in the generated file contains a `[🔗 Link](github-url)` with the GitHub comment URL
+- ALWAYS create a local file link using the file path and line number: `[filename:line](./relative/path/to/file.ts#Lline)`
+- Format: `📄 File: [filename:line](./path.ts#Lline) Line: X | [🔗 GitHub Comment](github-url)`
+- The local file link opens the file directly in Cursor at the specific line!
+
+### Step 3: Analyze and present comments
+
+🚨 **MANDATORY STEP - MUST BE COMPLETED - NEVER SKIP THIS! 🚨**
+
+**THIS IS THE MOST IMPORTANT STEP - ALWAYS SHOW THE BEAUTIFUL LIST!**
+
+**🚨 CRITICAL RULES:**
+1. **NEVER skip this step** - even if `autoFix: true`, you MUST show the list first!
+2. **NEVER start fixing** without showing this list first!
+3. **ALWAYS use the exact format below** - no shortcuts, no simplifications!
+4. **ALL sections are required** - statistics, comments list, summary, next steps menu!
+
+**ALWAYS respond in this EXACT format:**
+
+```
+✅ Fetched comments from PR #NUMBER
+
+📊 Comments Statistics:
+   ✅ Resolved: X
+   ⏳ Unresolved: Y  
+   📋 Total: Z
+   📈 Progress: X/Z (XX%)
+   ████████████████░░░░ 75%
+
+---
+
+## 📝 UNRESOLVED Comments to work on:
+
+⚠️ **IMPORTANT:** Only work with UNRESOLVED comments (⏳). Resolved comments (✅) are shown in the file for reference only.
+
+### 1️⃣ **📄 File:** [`file-name.ts:line-number`](./file-name.ts#Lline-number) **Line:** [line number] | [🔗 GitHub Comment](comment-github-url)
+⏳ **UNRESOLVED**
+
+👤 **Reviewer:** @author-name  
+💬 **Comment:** "comment text"
+
+💡 **What this means:** 
+[Detailed explanation in English - 3-5 sentences explaining:
+- What the reviewer noticed in the code
+- Why this is an issue or improvement opportunity  
+- What the expected outcome should be
+- Why this matters for code quality/maintainability]
+
+🌟 **Reviewer Recognition:**
+[Write a personalized, encouraging praise for the reviewer if their comment makes sense. 
+Be creative and warm, like: "Amazing catch - this kind of attention to detail really improves code quality!" or 
+"@reviewer has an eagle eye for these patterns - this suggestion will make the codebase more maintainable!" or
+"Great observation by @reviewer - this kind of insight is what makes code reviews valuable!"
+If the comment doesn't make sense or seems incorrect, skip this section politely.]
+
+⭐ **Difficulty:** Easy / ⭐⭐ Medium / ⭐⭐⭐ Hard  
+⏱️ **Time:** ~X minutes
+
+---
+
+### 2️⃣ **📄 File:** [`file-name.vue:line-number`](./file-name.vue#Lline-number) **Line:** [line number] | [🔗 GitHub Comment](comment-github-url)
+⏳ **UNRESOLVED**
+
+👤 **Reviewer:** @author-name  
+💬 **Comment:** "comment text"
+
+💡 **What this means:** 
+[Detailed explanation - 3-5 sentences]
+
+🌟 **Reviewer Recognition:**
+[Personalized praise if comment makes sense]
+
+⭐ **Difficulty:** Easy / ⭐⭐ Medium / ⭐⭐⭐ Hard  
+⏱️ **Time:** ~X minutes
+
+---
+
+## 🎯 Summary:
+
+📊 **Unresolved comments:** Y (work on these)
+✅ **Resolved comments:** X (already done)
+📁 **Files to change:** X
+⏱️ **Estimated time:** ~X minutes
+⭐ **Difficulty level:** [Easy/Medium/Hard]
+
+---
+
+## ❓ What's next?
+
+Would you like me to:
+
+1️⃣ ✅ **Fix all** — automatically resolve all comments
+2️⃣ 🔍 **Show details** — show detailed analysis before changes
+3️⃣ 🎯 **Fix selected** — tell me which comments you want to resolve
+4️⃣ ❌ **Cancel** — just wanted to see what needs to be done
+
+💬 Respond with a number (1-4) or tell me what you want to do.
+```
+
+### Step 4: Fix decision
+
+🚨 **MANDATORY STEP - MUST BE COMPLETED!**
+
+**You just completed Step 3 (showing beautiful list).** ✅
+**Now you MUST decide what to do next:**
+
+**Decision tree:**
+
+1. **Check configuration** (from Step 0):
+   - ✅ `autoFix: true` in config → **Proceed DIRECTLY to Step 5** (start fixing automatically, BUT LIST WAS ALREADY SHOWN!)
+   - ❌ `autoFix: false` or no config → **Show menu and WAIT for user response**
+
+2. **If `autoFix: false` or no config file:**
+   - ✅ **STOP HERE and WAIT for user response!**
+   - ✅ **DO NOT proceed to Step 5 automatically!**
+   - ✅ **Show the "What's next?" menu** (already in Step 3 format)
+   - ⚠️ **WAIT for user to respond with option 1-4**
+
+3. **If `autoFix: true`:**
+   - ✅ **Proceed DIRECTLY to Step 5** (start fixing)
+   - ✅ **BUT remember:** Step 3 (beautiful list) was ALREADY shown!
+   - ✅ **No need to ask again** - just start fixing
+
+**User response options (if waiting):**
+- `"1"` or `"fix all"` or `"1️⃣"` → Go to Step 5 (fix all comments)
+- `"2"` or `"show details"` or `"2️⃣"` → Show detailed analysis of each comment
+- `"3"` or `"fix selected"` or specific numbers like `"1,3"` → Fix only selected comments
+- `"4"` or `"cancel"` or `"❌"` → End workflow (no changes)
+
+**🚨 CRITICAL:** Do NOT skip this step! Always check config and follow the decision tree!
+
+### Step 5: Resolve comments (ONLY after Step 3 list was shown!)
+
+**🚨 YOU MUST HAVE SHOWN THE BEAUTIFUL LIST FIRST (Step 3)! 🚨**
+
+You can ONLY start fixing if ONE of these conditions is true:
+- User responded with "1", "fix all", or similar confirmation (after seeing the list)
+- OR `autoFix: true` is set in `.pr-cleaner-ai.config.json` (but list was still shown!)
+
+**NEVER skip Step 3 (the beautiful list)! Always show it first, even with autoFix: true!**
+
+For each comment:
+
+1. **Find comment** - identify file, line, and GitHub comment URL (from html_url field)
+2. **Open file** - use read_file tool
+3. **Find specified line/section** - locate exact place
+4. **Understand intent** - analyze what reviewer meant (provide detailed 3-5 sentence explanation)
+5. **Recognize reviewer** - if comment makes sense, write warm praise (e.g., "Great catch by @reviewer!")
+6. **Always include link** - format: `📄 File: [filename:line](./path/to/file.ts#Lline) Line: X | [🔗 GitHub Comment](github-url)` (local file link + GitHub link)
+7. **Propose solution** - explain what you intend to do IN ENGLISH (detailed, 3-4 sentences)
+8. **Make change** - use search_replace or write tool
+9. **Explain change** - tell user what you did and why IN ENGLISH (detailed, 3-4 sentences)
+
+### Step 6: Summary
+
+After resolving comments, **ALWAYS** provide a beautiful summary with icons:
+
+```
+---
+
+## ✅ All Done! Comments Resolved
+
+🎯 **Summary:**
+- ✅ Resolved: X comment(s)
+- 📁 Files changed: X
+- ⏱️ Time spent: ~X minutes
+- 👥 Reviewers addressed: @reviewer1, @reviewer2
+
+---
+
+## 📝 Files Modified:
+
+📄 **file1.ts**
+   ✨ [brief change description]
+   💬 Addressed: @reviewer comment about [topic]
+
+📄 **file2.vue**
+   ✨ [brief change description]
+   💬 Addressed: @reviewer comment about [topic]
+
+---
+
+## 🔍 Review Your Changes:
+
+Before committing, review the changes:
+
+```bash
+git diff
+```
+
+---
+
+## 💡 Suggested Commit:
+
+```bash
+git add file1.ts file2.vue
+git commit -m "fix: resolve PR #NUMBER review comments
+
+- [change 1 description]
+- [change 2 description]
+
+Addresses comments from @reviewer1, @reviewer2"
+```
+
+**CRITICAL:** 
+- ⚠️ **ONLY suggest** the commit command
+- ❌ **NEVER execute** git commit yourself  
+- 👀 Let user review changes with `git diff` first
+- 👤 User has final control over git history
+
+---
+
+🎉 **All comments resolved successfully!**
+
+You can now:
+- ✅ Review changes with `git diff`
+- ✅ Commit when ready
+- ✅ Push to your branch
+- ✅ Mark comments as resolved on GitHub
+```
+
+## Response format for each comment being resolved
+
+**CRITICAL: ALWAYS use this exact format for every comment!**
+
+```
+## 🔧 Resolving comment #X: **📄 File:** [`file-name.ts:line-number`](./file-name.ts#Lline-number) **Line:** [line number] | [🔗 GitHub Comment](comment-github-url)
+
+👤 **Reviewer:** @author-name  
+💬 **Comment:** "comment text"
+
+---
+
+### 🔍 What I found:
+[Detailed description of current code in English - explain what the code currently does, 
+the specific issue the reviewer identified, and why it needs to be changed. Be thorough - 3-4 sentences.]
+
+---
+
+### 💡 What I'm changing:
+[Detailed description of proposed change in English - explain exactly what you're going to modify,
+how it addresses the reviewer's concern, and what the new behavior will be. 3-4 sentences.]
+
+---
+
+### ✅ Change applied:
+```diff
+[Show clear before/after code diff or explanation]
+```
+
+---
+
+### ✨ Why this is better:
+[Detailed explanation in English - explain how this change improves code quality, maintainability,
+performance, readability, or addresses the specific concern raised. Include how it aligns with best practices. 3-4 sentences.]
+
+🌟 **Thanks to @author-name for the sharp observation!** [Optional brief recognition if appropriate]
+```
+
+## Important rules
+
+**🚨 MOST IMPORTANT RULES - READ FIRST! 🚨**
+
+1. **ALWAYS ACTIVATE ON ANY PR FORMAT!** - If you see ANY variation of PR number (#123, PR 123, pr123, PR#123, etc.) → ACTIVATE IMMEDIATELY and extract the number!
+
+2. **ALWAYS COMPLETE ALL STEPS!** - Once activated, you MUST complete Steps 0-6 in order. NO SKIPPING, NO SHORTCUTS!
+
+3. **ALWAYS SHOW THE BEAUTIFUL LIST FIRST!** - No matter what (even with `autoFix: true`), you MUST:
+   - Complete Step 3: Show beautiful list with all comments
+   - Include all icons (📄, ⏳, ✅, 👤, 💬, 💡, 🌟, ⭐, ⏱️)
+   - Include file links (both local `[file:line](./path#L123)` and GitHub)
+   - Include detailed explanations (3-5 sentences)
+   - Include reviewer recognition (warm praise if comment makes sense)
+   - Include difficulty and time estimates
+   - Include the summary section (🎯 Summary)
+   - Include "What's next?" menu (if `autoFix: false`)
+
+4. **After showing list - check autoFix setting:**
+   - `autoFix: false` or no config → Show "What's next?" menu and WAIT for user
+   - `autoFix: true` → Proceed directly to fixing (but list was already shown!)
+
+5. **NEVER skip the list!** - The beautiful list is ALWAYS required, regardless of configuration
+
+6. **If error occurs - TRY ALTERNATIVES!** - If Step 1 fails, try alternative commands. If Step 2 fails, check all locations. DO NOT give up!
+
+7. **Extract PR number intelligently** - Look for digits after PR/pr/#/PR#/pr#. Be lenient - if it looks like a PR reference, use it!
+
+8. **Consistent format** - ALWAYS use the exact same format for every comment response
+
+9. **Always include file link** - EVERY comment must show: `📄 File: [filename:line](./path/to/file.ts#Lline) Line: X | [🔗 GitHub Comment](github-url)` with:
+   - Clickable link to local file in project (opens in Cursor at specific line)
+   - Separate link to GitHub comment for reference
+
+10. **Detailed explanations** - Provide 3-5 sentences explaining what the reviewer noticed, why it matters, and what should change
+
+11. **Recognize reviewers** - If the comment makes sense, write a warm, creative praise like "Amazing attention to detail!" or "@reviewer has an eagle eye for code quality!"
+
+12. **Clear summaries** - always show what will be changed with detailed context
+
+13. **Assess difficulty** - help user estimate work
+
+14. **Be helpful** - suggest best solutions
+
+15. **Workflow enforcement** - If ANY step fails, explain error in English, propose solution, try alternatives, but COMPLETE THE WORKFLOW!
+
+## Usage examples (ALL trigger activation)
+
+These messages **MUST activate** this rule:
+
+**User:** "fix PR 2146"
+**User:** "PR 2146"  
+**User:** "resolve PR comments for 2146"
+**User:** "PR#2146"
+**User:** "pr2146"
+**User:** "fix pr 2146"
+**User:** "#2146"
+**User:** "fix #2146"
+**User:** "pr #2146"
+**User:** "can you help with PR 2146?"
+**User:** "what about pr2146?"
+**User:** "please look at PR#2146"
+**User:** "apply fixes from PR 2146"
+**User:** "handle PR 2146 comments"
+**User:** "work on pr 2146"
+**User:** "check PR 2146" (if context suggests fixing)
+
+**All of the above MUST trigger the workflow!**
+
+---
+
+## Usage example (detailed response)
+
+**User:** "fix PR 2146" (or any variation above)
+
+**You:**
+```
+✅ Fetched comments from PR #2146
+
+📊 Comments Statistics:
+   ✅ Resolved: 3
+   ⏳ Unresolved: 1  
+   📋 Total: 4
+   📈 Progress: 3/4 (75%)
+   ████████████████░░░░ 75%
+
+---
+
+## 📝 UNRESOLVED Comments to work on:
+
+⚠️ **IMPORTANT:** Only work with UNRESOLVED comments (⏳). Resolved comments (✅) are shown in the file for reference only.
+
+### 1️⃣ **📄 File:** [`useFormValidation.ts:42`](./src/hooks/useFormValidation.ts#L42) **Line:** 42 | [🔗 GitHub Comment](https://github.com/owner/repo/pull/2146#discussion_r12345678)
+⏳ **UNRESOLVED**
+
+👤 **Reviewer:** @code-reviewer  
+💬 **Comment:** "early return pattern will be useful"
+
+💡 **What this means:** 
+The reviewer noticed that the current code uses nested if statements in a watch callback function. 
+Instead of having multiple levels of nesting, they're suggesting to use the "early return" pattern, 
+which checks for exit conditions first and returns early, leaving the main logic at the top level. 
+This pattern improves code readability by reducing cognitive complexity and making the happy path 
+more obvious. It's a well-established best practice that makes code easier to understand and maintain, 
+especially when dealing with validation or conditional logic.
+
+🌟 **Reviewer Recognition:**
+@code-reviewer has an eagle eye for code quality - this suggestion will make the codebase more maintainable! 
+Great catch on identifying an opportunity to improve code readability.
+
+⭐ **Difficulty:** Easy  
+⏱️ **Time:** ~2 minutes
+
+---
+
+## 🎯 Summary:
+
+📊 **Unresolved comments:** 1 (work on these)
+✅ **Resolved comments:** 3 (already done)
+📁 **Files to change:** 1
+⏱️ **Estimated time:** ~2 minutes
+⭐ **Difficulty level:** Easy
+
+---
+
+## ❓ What's next?
+
+Would you like me to:
+
+1️⃣ ✅ **Fix all** — automatically resolve all comments
+2️⃣ 🔍 **Show details** — show detailed analysis before changes
+3️⃣ 🎯 **Fix selected** — tell me which comments you want to resolve
+4️⃣ ❌ **Cancel** — just wanted to see what needs to be done
+
+💬 Respond with a number (1-4) or tell me what you want to do.
+```
+
+**User responds:** "1"
+
+**You:**
+```
+🚀 Starting to fix!
+
+---
+
+## 🔧 Resolving comment #1: **📄 File:** [`useFormValidation.ts:42`](./src/hooks/useFormValidation.ts#L42) **Line:** 42 | [🔗 GitHub Comment](https://github.com/owner/repo/pull/2146#discussion_r12345678)
+
+👤 **Reviewer:** @code-reviewer  
+💬 **Comment:** "early return pattern will be useful"
+
+---
+
+### 🔍 What I found:
+In the watch() callback function, there's nested conditional logic that checks if the new length 
+is greater than 0 and if there's a validation error. The current structure forces developers 
+to mentally parse multiple levels of nesting to understand the flow. This increases cognitive 
+load and makes it harder to quickly understand what the code is doing. The nested structure 
+also makes it less obvious what the "happy path" is versus the edge cases.
+
+---
+
+### 💡 What I'm changing:
+I'll refactor this to use the early return pattern. Instead of nesting the condition inside 
+the main logic flow, I'll check for the negative condition first (no validation error or 
+invalid length) and return early. This leaves the main logic (clearing the validation error) 
+at the top level, making it immediately clear what the primary action is. The early return 
+handles the edge cases upfront, reducing mental overhead when reading the code.
+
+---
+
+### ✅ Change applied:
+```diff
+// Before:
+if (newLength > 0 && hasMaterialsValidationError.value) {
+  hasMaterialsValidationError.value = false;
+}
+
+// After:
+if (newLength === 0 || !hasMaterialsValidationError.value) {
+  return;
+}
+hasMaterialsValidationError.value = false;
+```
+
+---
+
+### ✨ Why this is better:
+This change significantly improves code readability by reducing nesting from multiple levels to a flat structure. 
+The early return pattern makes it immediately clear what conditions cause the function to exit early, 
+and what the main logic does when those conditions aren't met. This aligns with clean code principles 
+and makes the code easier to maintain, test, and debug. Future developers will spend less time 
+understanding the control flow and more time focusing on the actual business logic.
+
+🌟 **Thanks to @code-reviewer for the sharp observation! This refactoring makes the code much more readable.**
+
+---
+
+## ✅ All Done! Comments Resolved
+
+🎯 **Summary:**
+- ✅ Resolved: 1 comment
+- 📁 Files changed: 1
+- ⏱️ Time spent: ~2 minutes
+- 👥 Reviewer addressed: @code-reviewer
+
+---
+
+## 📝 Files Modified:
+
+📄 **File:** [`useFormValidation.ts:42`](./src/hooks/useFormValidation.ts#L42) **Line:** 42 | [🔗 GitHub Comment](https://github.com/owner/repo/pull/2146#discussion_r12345678)
+   ✨ Applied early return pattern in watch callback
+   💬 Addressed: @code-reviewer comment about code readability
+
+---
+
+## 🔍 Review Your Changes:
+
+Before committing, review the changes:
+
+```bash
+git diff
+```
+
+---
+
+## 💡 Suggested Commit:
+
+```bash
+git add src/hooks/useFormValidation.ts
+git commit -m "refactor: apply early return pattern in watch callback
+
+- Simplified condition logic in validation watcher
+- Improved code readability
+- Addresses review comment from @code-reviewer"
+```
+
+---
+
+🎉 **All comments resolved successfully!**
+
+You can now:
+- ✅ Review changes with `git diff`
+- ✅ Commit when ready
+- ✅ Push to your branch
+- ✅ Mark comments as resolved on GitHub
+```
+
+---
+
+## Final Step: Commit Suggestion
+
+**IMPORTANT:** After completing all fixes, ALWAYS:
+
+1. **Suggest a commit message** with:
+   - Clear description of changes
+   - List of affected files
+   - Reference to PR comments resolved
+   - Use conventional commit format (feat:, fix:, refactor:, etc.)
+
+2. **NEVER execute the commit yourself**
+   - Only show the git commands
+   - Let the user review and execute
+   - User should verify changes before committing
+
+**Example suggestion:**
+```bash
+# Review your changes first:
+git diff
+
+# When ready, commit:
+git add <files>
+git commit -m "fix: resolve PR #2146 review comments
+
+- Rename tmp → sessionToken in auth.ts
+- Add null check in errorHandler.ts
+- Update test assertions in auth.spec.ts"
+```
+
+**Reasoning:** Users need to:
+- Review changes before committing
+- Potentially add more files
+- Adjust commit message
+- Maintain control over git history
+
+---
+
+## Error handling
+
+If error occurs - explain IN ENGLISH:
+- **404** - "PR #X does not exist or you don't have access to it"
+- **Authentication error** - "GitHub CLI is not authenticated. Run: gh auth login"
+- **No comments** - "PR #X has no comments to resolve"
+
+Then propose solution from documentation.

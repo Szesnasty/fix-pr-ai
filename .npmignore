@@ -1,0 +1,41 @@
+# Development files
+*.tsbuildinfo
+*.log
+.DS_Store
+.env*
+
+# Test files
+*.test.ts
+*.spec.ts
+test/
+tests/
+__tests__/
+
+# Documentation (keep README.md, remove others)
+*.md
+!README.md
+
+# Output files
+output/
+dist/
+.pr-cleaner-ai-output/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# Node modules (will be installed by users)
+node_modules/
+
+# Package development files
+package-lock.json
+yarn.lock
+.cursor/
+
