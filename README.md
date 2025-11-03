@@ -237,7 +237,12 @@ Create `.pr-cleaner-ai.config.json` if you want to change how fixes are applied:
   "additionalRules": [
     ".cursor/rules/coding-standards.mdc",
     ".cursor/rules/testing-requirements.mdc"
-  ]
+  ],
+  "commitBatch": {
+    "threshold": {
+      "comments": 2
+    }
+  }
 }
 ```
 
@@ -245,6 +250,13 @@ Options:
 - `autoFix: false` (default) – interactive mode, asks before each patch  
 - `autoFix: true` – hands-free mode, applies all fixes automatically
 - `additionalRules` (optional) – array of rule file paths that Cursor should consider when resolving PR comments. These files will be automatically referenced in the generated markdown output.
+- `commitBatch.threshold.comments` (optional) – after fixing this many comments, Cursor will:
+  - ✅ Stop and show what was fixed
+  - 💡 **Suggest** a commit message (never auto-commits!)
+  - ⏸️ Wait for your approval before continuing
+  - 🔄 Show brief summary of what's done vs what's remaining
+  
+  Example: if set to `2` and there are 10 comments, Cursor will fix 2 comments, suggest a commit, wait for you to commit, then continue with the next batch.
 
 ---
 

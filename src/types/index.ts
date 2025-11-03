@@ -45,6 +45,11 @@ export interface GroupedComment {
 export interface Config {
   autoFix?: boolean;
   additionalRules?: string[];
+  commitBatch?: {
+    threshold?: {
+      comments?: number; // After how many fixed comments to suggest a commit
+    };
+  };
 }
 
 export interface PRMetadata {

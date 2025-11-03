@@ -3,6 +3,11 @@
   "additionalRules": [
     ".cursor/rules/coding-standards.mdc",
     ".cursor/rules/testing-requirements.mdc"
-  ]
+  ],
+  "commitBatch": {
+    "threshold": {
+      "comments": 2
+    }
+  }
 }
 

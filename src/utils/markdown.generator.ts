@@ -217,6 +217,18 @@ export class MarkdownGenerator {
       markdown += `\n**Note:** Cursor will automatically read these rule files when resolving comments. Make sure to reference them for coding standards, testing requirements, or security guidelines.\n`;
     }
 
+    // Add commit batch configuration if present
+    if (this.config.commitBatch?.threshold?.comments) {
+      markdown += `\n---\n\n`;
+      markdown += `## 🔄 Commit Batch Configuration\n\n`;
+      markdown += `**Commit Threshold:** After fixing **${this.config.commitBatch.threshold.comments}** comment(s), Cursor should:\n\n`;
+      markdown += `1. ✅ Stop and show what was fixed\n`;
+      markdown += `2. 💡 Suggest a commit message describing the changes\n`;
+      markdown += `3. ⏸️  Wait for your approval before continuing\n`;
+      markdown += `4. 🔄 After commit, show brief summary: what's done ✅ vs what's remaining ⏳\n\n`;
+      markdown += `> ⚠️ **IMPORTANT:** Cursor will NEVER auto-commit. It will only suggest commits and wait for your explicit approval.\n`;
+    }
+
     return markdown;
   }
 }

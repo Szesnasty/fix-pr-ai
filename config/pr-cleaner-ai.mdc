@@ -351,6 +351,75 @@ You can ONLY start fixing if ONE of these conditions is true:
 
 **NEVER skip Step 3 (the beautiful list)! Always show it first, even with autoFix: true!**
 
+**🔄 COMMIT BATCH MODE (if configured in `.pr-cleaner-ai.config.json`):**
+
+If user has `commitBatch.threshold.comments` configured, you MUST follow this workflow:
+
+1. **Check config** - look for `commitBatch.threshold.comments` value (e.g., 2)
+2. **Fix N comments** - fix exactly that many comments (e.g., 2)
+3. **Stop and show progress:**
+   ```
+   ---
+   
+   ⏸️ **Pausing after N fixed comments** (as per your config)
+   
+   ✅ **What was fixed:**
+   - Comment #1: [file:line] - [brief description]
+   - Comment #2: [file:line] - [brief description]
+   
+   ⏳ **What's remaining:**
+   - Comment #3: [file:line]
+   - Comment #4: [file:line]
+   - ... (X more)
+   
+   ---
+   
+   💡 **Suggested commit:**
+   ```bash
+   git add file1.ts file2.ts
+   git commit -m "fix: resolve PR #NUMBER comments (1-2)
+   
+   - [brief description of fix 1]
+   - [brief description of fix 2]
+   
+   Addresses comments from @reviewer1, @reviewer2"
+   ```
+   
+   ⚠️ **IMPORTANT:** I will NEVER auto-commit. Please review changes and commit manually.
+   
+   ---
+   
+   💬 **What's next?**
+   - ✅ Review changes with `git diff`
+   - ✅ Commit when ready
+   - ✅ Type "continue" or "next" to proceed with remaining comments
+   ```
+
+4. **Wait for user** - STOP and wait for user to:
+   - Review changes with `git diff`
+   - Commit manually (you NEVER commit!)
+   - Respond with "continue", "next", or similar
+
+5. **Resume** - when user says "continue", fix next batch of N comments
+6. **Repeat** - continue this cycle until all comments are resolved
+
+**🚨 CRITICAL RULES FOR COMMIT BATCH MODE:**
+- ✅ Fix EXACTLY N comments per batch (from `threshold.comments`)
+- ✅ Show clear progress after each batch (what's done ✅ vs what's remaining ⏳)
+- ✅ ALWAYS suggest commit, NEVER execute it
+- ✅ WAIT for user confirmation before continuing
+- ✅ Keep summary brief and actionable
+- ❌ NEVER auto-commit, even if user seems to want it
+- ❌ NEVER continue automatically - always wait for "continue"/"next" response
+
+**Example with `commitBatch.threshold.comments: 2` and 10 total comments:**
+- Batch 1: Fix comments 1-2, suggest commit, WAIT ⏸️
+- User: reviews, commits, says "continue"
+- Batch 2: Fix comments 3-4, suggest commit, WAIT ⏸️
+- User: reviews, commits, says "next"
+- Batch 3: Fix comments 5-6, suggest commit, WAIT ⏸️
+- ... continue until all 10 are done
+
 For each comment:
 
 1. **Find comment** - identify file, line, and GitHub comment URL (from html_url field)
