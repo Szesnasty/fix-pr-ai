@@ -19,7 +19,7 @@ jobs:
           package-name: pr-cleaner-ai
 
       # Publikujemy tylko gdy powstał nowy release/tag
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: ${{ steps.release.outputs.release_created }}
         with:
           ref: ${{ steps.release.outputs.tag_name }}
