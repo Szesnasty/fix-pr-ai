@@ -37,6 +37,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Clean source maps
+        run: npm run clean:maps
+
       - name: Check for source maps
         run: |
           if find dist -name '*.map' | grep -q .; then
