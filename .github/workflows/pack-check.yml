@@ -9,10 +9,12 @@ on:
 jobs:
   pack-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4.0.3
         with:
           node-version: 20
 
