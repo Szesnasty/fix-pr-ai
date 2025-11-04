@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.10](https://github.com/Szesnasty/pr-cleaner-ai/compare/v1.2.9...v1.2.10) (2025-11-04)
+
+
+### Bug Fixes
+
+* **security:** move id-token write permission to job-level ([11a781f](https://github.com/Szesnasty/pr-cleaner-ai/commit/11a781f106edab4d4fb7658686bf1047ee87cf78))
+
+
+### Miscellaneous Chores
+
+* bump version to 1.2.10 and restore publishConfig.provenance ([c3712c7](https://github.com/Szesnasty/pr-cleaner-ai/commit/c3712c7c9f16cfe558cc91883728ba5008ea7d68))
+
 ## [1.2.9](https://github.com/Szesnasty/pr-cleaner-ai/compare/v1.2.8...v1.2.9) (2025-11-04)
 
 
