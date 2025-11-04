@@ -1,8 +1,4 @@
 {
-  "packages": {
-    ".": {
-      "component": "pr-cleaner-ai"
-    }
-  }
+  ".": "1.2.4"
 }
 
